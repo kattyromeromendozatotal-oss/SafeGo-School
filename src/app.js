@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 const db = require('./config/db');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,10 +12,13 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Ruta de comprobación de estado de la API y conexión a BD
+// Definición de Rutas de la API
+app.use('/api/users', userRoutes);
+
+// Ruta de comprobación de estado de la API
 app.get('/api/health', async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT 1 + 1 AS result');
+        await db.query('SELECT 1 + 1 AS result');
         res.status(200).json({
             status: 'OK',
             message: 'SafeGo School API service is operational',
