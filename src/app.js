@@ -6,6 +6,7 @@ const db = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const studentRoutes = require('./routes/studentRoutes');
+const routeRoutes = require('./routes/routeRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,10 +15,11 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Definición de Rutas de la API
+// Definición de Rutas de la API REST
 app.use('/api/users', userRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api/routes', routeRoutes);
 
 // Ruta de comprobación de estado de la API
 app.get('/api/health', async (req, res) => {
