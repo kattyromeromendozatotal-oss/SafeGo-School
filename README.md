@@ -3,7 +3,7 @@
 > Sistema de gestión y seguimiento en tiempo real para el transporte escolar.
 
 ## 📝 Descripción del Proyecto
-SafeGo School es una solución tecnológica desarrollada como proyecto formativo para el programa **Tecnólogo en Análisis y Desarrollo de Software (ADSO) - SENA**. 
+SafeGo School es una solución tecnológica desarrollada como proyecto formativo para el programa **Tecnólogo en Análisis y Desarrollo de Software (ADSO) -**. 
 
 El objetivo es brindar tranquilidad a los padres de familia y optimizar la gestión logística de las instituciones educativas y conductores de rutas escolares.
 
