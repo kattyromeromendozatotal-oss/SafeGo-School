@@ -7,6 +7,7 @@ const userRoutes = require('./routes/userRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const routeRoutes = require('./routes/routeRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/routes', routeRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // Ruta de comprobación de estado de la API
 app.get('/api/health', async (req, res) => {
