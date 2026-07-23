@@ -1,80 +1,74 @@
-const AttendanceModel = require('../models/attendanceModel');
+const attendanceModel = require('../models/attendanceModel');
 
-const getAllAttendance = async (req, res) => {
+const getAttendance = async (req, res) => {
     try {
-        const records = await AttendanceModel.findAll();
-        res.status(200).json({
-            status: 'success',
-            data: records
-        });
+        const records = await attendanceModel.getAllAttendance();
+        res.status(200).json(records);
     } catch (error) {
-        res.status(500).json({
-            status: 'error',
-            message: 'Error al obtener el historial de asistencias',
-            details: error.message
-        });
+        res.status(500).json({ status: 'ERROR', message: error.message });
     }
 };
 
-const getAttendanceByStudent = async (req, res) => {
+const recordAttendance = async (req, res) => {
+    const { student_id, route_id, status } = req.body;
     try {
-        const { studentId } = req.params;
-        const records = await AttendanceModel.findByStudentId(studentId);
-
-        res.status(200).json({
-            status: 'success',
-            data: records
-        });
+        await attendanceModel.createAttendance(student_id, route_id, status);
+        res.status(201).json({ status: 'SUCCESS', message: 'Asistencia registrada' });
     } catch (error) {
-        res.status(500).json({
-            status: 'error',
-            message: 'Error al obtener la asistencia del estudiante',
-            details: error.message
-        });
+        res.status(500).json({ status: 'ERROR', message: error.message });
     }
 };
 
-const registerAttendance = async (req, res) => {
-    try {
-        const { id_estudiante, id_ruta, id_usuario_registro, tipo_evento, ubicacion_lat_lng } = req.body;
+const syncOfflineAttendance = async (req, res) => {
+    const { device_id, route_id, records } = req.body;
 
-        if (!id_estudiante || !id_ruta || !tipo_evento) {
-            return res.status(400).json({
-                status: 'fail',
-                message: 'Los campos id_estudiante, id_ruta y tipo_evento son obligatorios'
-            });
+    if (!route_id || !Array.isArray(records) || records.length === 0) {
+        return res.status(400).json({ 
+            status: 'ERROR', 
+            message: 'Datos de sincronización inválidos o lista vacía.' 
+        });
+    }
+
+    try {
+        const processedRecords = [];
+        const errors = [];
+
+        for (const record of records) {
+            const { student_id, scanned_at, status } = record;
+
+            const subscription = await attendanceModel.checkSubscriptionStatus(student_id, route_id);
+
+            if (subscription && subscription.status === 'SUSPENDED') {
+                errors.push({ student_id, reason: 'Suscripción suspendida o en mora.' });
+                continue;
+            }
+
+            await attendanceModel.insertOfflineRecord(
+                student_id, 
+                route_id, 
+                status, 
+                scanned_at, 
+                device_id
+            );
+
+            processedRecords.push({ student_id, scanned_at });
         }
 
-        const attendanceId = await AttendanceModel.create({
-            id_estudiante,
-            id_ruta,
-            id_usuario_registro,
-            tipo_evento,
-            ubicacion_lat_lng
+        return res.status(200).json({
+            status: 'SUCCESS',
+            message: `Sincronización completada. ${processedRecords.length} registros procesados.`,
+            synced_count: processedRecords.length,
+            errors
         });
 
-        res.status(201).json({
-            status: 'success',
-            message: 'Registro de abordaje almacenado correctamente',
-            data: {
-                id: attendanceId,
-                id_estudiante,
-                id_ruta,
-                tipo_evento,
-                fecha_hora: new Date()
-            }
-        });
     } catch (error) {
-        res.status(500).json({
-            status: 'error',
-            message: 'Error al registrar el abordaje',
-            details: error.message
-        });
+        console.error('Error en sincronización offline:', error);
+        return res.status(500).json({ status: 'ERROR', message: 'Error interno del servidor.' });
     }
 };
 
 module.exports = {
-    getAllAttendance,
-    getAttendanceByStudent,
-    registerAttendance
+    getAttendance,
+    recordAttendance,
+    syncOfflineAttendance
 };

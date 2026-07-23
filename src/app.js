@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const db = require('./config/db');
 const userRoutes = require('./routes/userRoutes');
+const authRoutes = require('./routes/authRoutes');
 const schoolRoutes = require('./routes/schoolRoutes');
 const studentRoutes = require('./routes/studentRoutes');
 const routeRoutes = require('./routes/routeRoutes');
@@ -44,3 +45,4 @@ app.get('/api/health', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+app.use('/api/auth', require('./routes/authRoutes'));
